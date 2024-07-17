@@ -1,0 +1,37 @@
+#ifndef query_hpp
+#define query_hpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+enum RelationalOperator {
+    RELOP_LESS, RELOP_GREATER, RELOP_EQUAL, RELOP_NOT_EQUAL
+};
+
+struct WhereClause {
+    string fieldname;
+    RelationalOperator relop;
+    string expectedValue;
+};
+
+
+enum QueryType {
+    QT_CREATE, QT_INSERT, QT_SELECT, QT_UPDATE, QT_NONE
+};
+
+inline string qt_as_string[] = {"CREATE", "INSERT", "SELECT", "UPDATE"};
+
+struct Query {
+    QueryType type;
+    string tableName;
+    bool order_results;
+    string order_on_field;
+    vector<string> fields;
+    vector<string> value;
+    vector<WhereClause> where_clause;
+};
+
+void initQuery(Query* query);
+void printQuery(Query query);
+
+#endif
