@@ -26,6 +26,7 @@ results can be filtered with the addition of a where clause, as well as sorted b
 
 ## Update data in table
 Data in the table can also be updated
+
       update employees set position = ceo where name = max;
 
 ## Delete data from table
