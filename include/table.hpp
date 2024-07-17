@@ -28,13 +28,16 @@ class Table {
         void           merge(vector<Row>& buffer, int l, int m, int r, string field);
         void           mergesort(vector<Row>& buffer, int l, int r, string field);
         void           printHeader();
+        void           eraseRowById(string id);
     public:
         Table(vector<string>& fields);
         Table();
-        Table& orderBy(string field);
         void addRow(vector<string>& cols, vector<string>& values);
-        void printTable();
+        int updateRows(Query query);
+        int removeRows(Query query);
         Table selectRows(Query query);
+        Table& orderBy(string field);
+        void printTable();
 };
 
 

@@ -16,10 +16,10 @@ struct WhereClause {
 
 
 enum QueryType {
-    QT_CREATE, QT_INSERT, QT_SELECT, QT_UPDATE, QT_NONE
+    QT_CREATE, QT_INSERT, QT_DELETE, QT_SELECT, QT_UPDATE, QT_NONE
 };
 
-inline string qt_as_string[] = {"CREATE", "INSERT", "SELECT", "UPDATE"};
+inline string qt_as_string[] = {"CREATE", "INSERT", "QT_DELETE", "SELECT", "UPDATE", "NONE"};
 
 struct Query {
     QueryType type;

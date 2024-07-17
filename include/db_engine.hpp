@@ -14,6 +14,7 @@ class TableDispatch {
         void executeCreate(Query query);
         void executeInsert(Query query);
         void executeUpdate(Query query);
+        void executeDelete(Query query);
         map<string, Table> tables;
     public:
         TableDispatch();
