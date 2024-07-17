@@ -25,8 +25,7 @@ Table Table::selectRows(Query query) {
                 nrow.push_back("<nil>");
             }
         }
-        bool row_passed_where_clause = checkWhereClause(query, row);
-        if (row_passed_where_clause) {
+        if (checkWhereClause(query, row)) {
             result_set.addRow(query.fields, nrow);
         }
     }
@@ -34,6 +33,38 @@ Table Table::selectRows(Query query) {
         result_set.orderBy(query.order_on_field);
     }
     return result_set;
+}
+
+int Table::updateRows(Query query) {
+    int updated = 0;
+    for (Row & row : rows) {
+        if (checkWhereClause(query, row)) {
+            row.at(getColumnIndex(query.fields[0])) = query.value[0];
+            updated++;
+        }
+    }
+    return updated;
+}
+
+int Table::removeRows(Query query) {
+    vector<string> toRemove;
+    for (Row row : rows) {
+        if (checkWhereClause(query, row))
+            toRemove.push_back(row[getColumnIndex("id")]);
+    }
+    for (auto victim : toRemove)
+        eraseRowById(victim);
+    return toRemove.size();
+}
+
+void Table::eraseRowById(string id) {
+    int pos = 0;
+    for (Row row : rows) {
+        if (id == row[getColumnIndex("id")])
+            break;
+        pos++;
+    }
+    rows.erase(rows.begin()+pos);
 }
 
 Table& Table::orderBy(string field) {

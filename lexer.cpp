@@ -109,4 +109,5 @@ void Lexer::initReserved() {
     reservedWord["values"] = Token(TK_VALUES, "values");
     reservedWord["order"] = Token(TK_ORDER, "order");
     reservedWord["by"] = Token(TK_BY, "by");
+    reservedWord["delete"] = Token(TK_DELETE, "delete");
 }

@@ -18,6 +18,8 @@ void TableDispatch::executeQuery(Query query) {
         case QT_UPDATE:
             executeUpdate(query);
             break;
+        case QT_DELETE:
+            executeDelete(query);
     }
 }
 
@@ -51,5 +53,19 @@ void TableDispatch::executeInsert(Query query) {
 }
 
 void TableDispatch::executeUpdate(Query query) {
-    
+    if (tables.find(query.tableName) == tables.end()) {
+        cout<<"Error dispatching query: table '"<<query.tableName<<"' - could not be found."<<endl;
+        return;
+    }
+    int count = tables[query.tableName].updateRows(query);
+    cout<<"Updated: "<<count<<" records."<<endl;
+}
+
+void TableDispatch::executeDelete(Query query) {
+    if (tables.find(query.tableName) == tables.end()) {
+        cout<<"Error dispatching query: table '"<<query.tableName<<"' - could not be found."<<endl;
+        return;
+    }
+    int count = tables[query.tableName].removeRows(query);
+    cout<<"Removed: "<<count<<" records."<<endl;
 }

@@ -33,6 +33,11 @@ Query LLParser::parse(vector<Token>& parse) {
             parseStep = LL_CREATE_TABLE;
             pop();
             return parseCreate();
+        case TK_DELETE:
+            query.type = QT_DELETE;
+            parseStep = LL_DELETE_ROWS_FROM;
+            pop();
+            return parseDelete();
         default:
             ll_error("unknown token: " + currentToken.strval);
             break;
@@ -135,7 +140,6 @@ Query LLParser::parseUpdate() {
                     parseStep = LL_UPDATE_FIELD;
                 } else if (currentSymbol() == TK_WHERE) {
                     parseStep = LL_WHERE_CLAUSE;
-                    pop();
                     parseWhereClause();
                 } else {
                     parseStep = LL_PARSE_ERROR;
@@ -329,6 +333,31 @@ Query LLParser::parseInsert() {
             default:
                 cout<<"Don't know what to do next!";
                 parseStep = LL_PARSE_ERROR;
+        }
+        pop();
+    }
+    return query;
+}
+
+Query LLParser::parseDelete() {
+    while (currentSymbol() != TK_EOS && parseStep != LL_PARSE_ERROR) {
+        status();
+        switch (parseStep) {
+            case LL_DELETE_ROWS_FROM:
+                if (currentSymbol() == TK_FROM) {
+                    parseStep = LL_DELETE_ROWS_FROM_TABLE_NAME;
+                } else {
+                    parseStep = LL_PARSE_ERROR;
+                }
+                break;
+            case LL_DELETE_ROWS_FROM_TABLE_NAME:
+                if (currentSymbol() == TK_ID) {
+                    query.tableName = currentToken.strval;
+                    parseStep = LL_WHERE_CLAUSE;
+                    pop();
+                    parseWhereClause();
+                    break;
+                }
         }
         pop();
     }
