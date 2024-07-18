@@ -27,7 +27,7 @@ struct Query {
     bool order_results;
     string order_on_field;
     vector<string> fields;
-    vector<string> value;
+    vector<vector<string>> value;
     vector<WhereClause> where_clause;
 };
 

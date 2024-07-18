@@ -32,7 +32,8 @@ class Table {
     public:
         Table(vector<string>& fields);
         Table();
-        void addRow(vector<string>& cols, vector<string>& values);
+        int rowCount();
+        int addRow(vector<string>& cols, vector<vector<string>>& values);
         int updateRows(Query query);
         int removeRows(Query query);
         Table selectRows(Query query);
