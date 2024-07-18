@@ -46,7 +46,7 @@ Query LLParser::parse(vector<Token>& parse) {
 }
 
 Query LLParser::parseCreate() {
-    while (currentSymbol() != TK_EOS && parseStep != LL_PARSE_ERROR) {
+    while (currentSymbol() != TK_EOS && parseStep != LL_PARSE_ERROR && parseStep != LL_SUCCESS) {
         status();
         switch (parseStep) {
             case LL_CREATE_TABLE:
@@ -102,7 +102,8 @@ Query LLParser::parseCreate() {
 }
 
 Query LLParser::parseUpdate() {
-    while (currentSymbol() != TK_EOS && parseStep != LL_PARSE_ERROR) {
+    vector<string> values;
+    while (currentSymbol() != TK_EOS && parseStep != LL_PARSE_ERROR && parseStep != LL_SUCCESS) {
         status();
         switch (parseStep) {
             case LL_UPDATE_TABLE:
@@ -117,23 +118,35 @@ Query LLParser::parseUpdate() {
             case LL_UPDATE_SET:
                 if (currentToken.token == TK_SET) {
                     parseStep = LL_UPDATE_FIELD;
-                    cout<<"Matched 'SET'"<<endl;
                 } else {
                     parseStep = LL_PARSE_ERROR;
                     ll_error("Mismatched Token, expect 'SET' but found " + currentToken.strval);
                 }
                 break;
             case LL_UPDATE_FIELD:
-                parseStep = LL_UPDATE_EQUALS;
-                query.fields.push_back(currentToken.strval);
+                if (currentSymbol() == TK_ID) {
+                    parseStep = LL_UPDATE_EQUALS;
+                    query.fields.push_back(currentToken.strval);
+                } else {
+                    parseStep = LL_PARSE_ERROR;
+                    ll_error("Syntax error, expected field name, but found: " + currentToken.strval);
+                }
                 break;
             case LL_UPDATE_EQUALS:
-                parseStep = LL_UPDATE_VALUE;    
-                cout<<"Matched '='"<<endl;                    
+                if (currentSymbol() == TK_EQUAL) {
+                    parseStep = LL_UPDATE_VALUE;
+                } else {
+                    parseStep = LL_PARSE_ERROR;
+                    ll_error("Syntax error: expected '=' but found: " + currentToken.strval);
+                }   
                 break;
             case LL_UPDATE_VALUE:
-                parseStep = LL_UPDATE_COMMA;
-                query.value.push_back(currentToken.strval);
+                if (currentSymbol() == TK_STRING || currentSymbol() == TK_NUMBER || currentSymbol() == TK_ID) {
+                    parseStep = LL_UPDATE_COMMA;
+                    values.push_back(currentToken.strval);
+                } else {
+                    parseStep = LL_PARSE_ERROR;
+                }
                 break;
             case LL_UPDATE_COMMA: {
                 if (currentSymbol() == TK_COMMA) {
@@ -149,6 +162,7 @@ Query LLParser::parseUpdate() {
         }
         pop();
     }
+    query.value.push_back(values);
     return query;
 }
 
@@ -235,7 +249,8 @@ Query LLParser::parseSelect() {
 }
 
 Query LLParser::parseInsert() {
-    while (currentSymbol() != TK_EOS && parseStep != LL_PARSE_ERROR) {
+    vector<string> values;
+    while (currentSymbol() != TK_EOS && parseStep != LL_PARSE_ERROR && parseStep != LL_SUCCESS) {
         status();
         switch (parseStep) {
             case LL_INSERT_INTO_TABLE:
@@ -293,6 +308,7 @@ Query LLParser::parseInsert() {
             case LL_INSERT_VALUES_OPEN_PAREN:
                 if (currentSymbol() == TK_LPAREN) {
                     parseStep = LL_INSERT_VALUES;
+                    values = vector<string>();
                 } else {
                     parseStep = LL_PARSE_ERROR;
                     ll_error("Mismatched token, expected '(' but found " + currentToken.strval);
@@ -301,7 +317,7 @@ Query LLParser::parseInsert() {
             case LL_INSERT_VALUES:
                 if (currentSymbol() == TK_ID || currentSymbol() == TK_STRING || currentSymbol() == TK_NUMBER || currentSymbol() == TK_TRUE || currentSymbol() == TK_FALSE) {
                     parseStep = LL_INSERT_VALUES_COMMA_OR_CLOSE_PAREN;
-                    query.value.push_back(currentToken.strval);
+                    values.push_back(currentToken.strval);
                 } else {
                     parseStep = LL_PARSE_ERROR;
                     ll_error("Mismatched Token, expect VALUES but found " + currentToken.strval);
@@ -310,21 +326,26 @@ Query LLParser::parseInsert() {
             case LL_INSERT_VALUES_COMMA_OR_CLOSE_PAREN:
                 if (currentToken.token == TK_COMMA) {
                     if (peek().token == TK_LPAREN) {
-                        parseStep == LL_INSERT_VALUES_COMMA_BEFORE_OPEN_PAREN;
+                        parseStep = LL_INSERT_VALUES_COMMA_BEFORE_OPEN_PAREN;
                     } else {
                         parseStep = LL_INSERT_VALUES;
                     }
                 } else if (currentToken.token == TK_RPAREN) {
-                    parseStep = LL_SUCCESS;
-                    return query;
+                    query.value.push_back(values);
+                    if (peek().token == TK_COMMA) {
+                        parseStep = LL_INSERT_VALUES_COMMA_BEFORE_OPEN_PAREN;
+                    } else {
+                        parseStep = LL_SUCCESS;
+                        return query;
+                    }
                 } else {
                     parseStep = LL_PARSE_ERROR;
                     ll_error("Mismatched Token, expect ',' or ')' but found " + currentToken.strval);
                 }
                 break;
             case LL_INSERT_VALUES_COMMA_BEFORE_OPEN_PAREN:
-                    if (currentSymbol() == TK_LPAREN) {
-                        parseStep = LL_INSERT_VALUES;
+                    if (currentSymbol() == TK_COMMA) {
+                        parseStep = LL_INSERT_VALUES_OPEN_PAREN;
                     } else {
                         parseStep = LL_PARSE_ERROR;
                         ll_error("I'm not really sure. This shouldn't happen.");
@@ -340,7 +361,7 @@ Query LLParser::parseInsert() {
 }
 
 Query LLParser::parseDelete() {
-    while (currentSymbol() != TK_EOS && parseStep != LL_PARSE_ERROR) {
+    while (currentSymbol() != TK_EOS && parseStep != LL_PARSE_ERROR && parseStep != LL_SUCCESS) {
         status();
         switch (parseStep) {
             case LL_DELETE_ROWS_FROM:
@@ -366,7 +387,7 @@ Query LLParser::parseDelete() {
 
 void LLParser::parseWhereClause() {
     WhereClause wc;
-    while (currentSymbol() != TK_EOS && parseStep != LL_PARSE_ERROR) {
+    while (currentSymbol() != TK_EOS && parseStep != LL_PARSE_ERROR && parseStep != LL_SUCCESS) {
         status();
         switch (parseStep) {
             case LL_WHERE_CLAUSE:
@@ -401,25 +422,30 @@ void LLParser::parseWhereClause() {
                 }
                 break;
             case LL_WHERE_VALUE:
-                if (currentSymbol() == TK_ID || currentSymbol() == TK_NUMBER) {
-                        wc.expectedValue = currentToken.strval;
+                if (currentSymbol() == TK_ID || currentSymbol() == TK_NUMBER || currentSymbol() == TK_STRING) {
+                    wc.expectedValue = currentToken.strval;
                     if (peek().token == TK_ORDER) {
                         parseStep = LL_SELECT_ORDER;
                         query.where_clause.push_back(wc);
                         return;
+                    } else if (peek().token == TK_SEMI || peek().token == TK_EOS) {
+                        parseStep = LL_SUCCESS;
+                    } else if (peek().token == TK_AND) {
+                        parseStep = LL_WHERE_AND;
+                    } else {
+                        parseStep = LL_PARSE_ERROR;
                     }
-                    parseStep = LL_WHERE_AND;
                 } else {
                     parseStep = LL_PARSE_ERROR;
                 }
                 break;
             case LL_WHERE_AND:
-                query.where_clause.push_back(wc);
                 parseStep = LL_WHERE_FIELD;
                 break;
         }
         pop();
     }
+    query.where_clause.push_back(wc);
 }
 
 TK_TYPE LLParser::currentSymbol() {

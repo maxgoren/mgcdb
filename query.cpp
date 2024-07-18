@@ -20,8 +20,11 @@ void printQuery(Query query) {
     }
     cout<<endl;
     cout<<"Values: ";
-    for (auto m : query.value) {
-        cout<<m<<", ";
+    for (auto row : query.value) {
+        for (auto val : row) {
+            cout<<val<<", ";
+        }
+        cout<<endl;
     }
     cout<<endl;
     for (auto wc : query.where_clause) {

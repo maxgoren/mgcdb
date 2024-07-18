@@ -27,7 +27,9 @@ void TableDispatch::executeSelect(Query query) {
     if (tables.find(query.tableName) == tables.end()) {
         cout<<"No such table: "<<query.tableName<<endl;
     } else {
-        tables[query.tableName].selectRows(query).printTable();
+        Table result = tables[query.tableName].selectRows(query);
+        result.printTable();
+        cout<<result.rowCount()<<" rows selected."<<endl;
     }
 }
 
@@ -43,13 +45,15 @@ void TableDispatch::executeCreate(Query query) {
 
 void TableDispatch::executeInsert(Query query) {
     string table = query.tableName;
+    int count = 0;
     if (tables.find(table) == tables.end()) {
         Table ntable;
-        ntable.addRow(query.fields, query.value);
+        count = ntable.addRow(query.fields, query.value);
         tables.insert(make_pair(table, ntable));
     } else {
-        tables[table].addRow(query.fields, query.value);
+        count = tables[table].addRow(query.fields, query.value);
     }
+    cout<<count<<" Rows added to table: "<<table<<endl;
 }
 
 void TableDispatch::executeUpdate(Query query) {

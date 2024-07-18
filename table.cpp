@@ -9,6 +9,10 @@ Table::Table() {
     init();
 }
 
+int Table::rowCount() {
+    return rows.size();
+}
+
 Table Table::selectRows(Query query) {
     if (query.fields.size() == 1 && query.fields[0] == "*") {
         query.fields.clear();
@@ -26,7 +30,9 @@ Table Table::selectRows(Query query) {
             }
         }
         if (checkWhereClause(query, row)) {
-            result_set.addRow(query.fields, nrow);
+            vector<Row> tmp;
+            tmp.push_back(nrow);
+            result_set.addRow(query.fields, tmp);
         }
     }
     if (query.order_results) {
@@ -39,7 +45,7 @@ int Table::updateRows(Query query) {
     int updated = 0;
     for (Row & row : rows) {
         if (checkWhereClause(query, row)) {
-            row.at(getColumnIndex(query.fields[0])) = query.value[0];
+            row.at(getColumnIndex(query.fields[0])) = query.value[0][0];
             updated++;
         }
     }
@@ -73,23 +79,26 @@ Table& Table::orderBy(string field) {
     return *this;
 }
 
-void Table::addRow(vector<string>& cols, vector<string>& values) {
-    if (cols.size() != values.size()) {
+int Table::addRow(vector<string>& cols, vector<vector<string>>& values) {
+    if (values.empty() || cols.size() != values[0].size()) {
         cout<<"Error: column count doesnt match value count."<<endl;
-        return;
+        return 0;
     }
     for (int i = 0; i < cols.size(); i++) {
         if (columnIndexByName.find(cols[i]) == columnIndexByName.end()) {
             columnIndexByName[cols[i]] = col_cnt++;
         }
     }
-    Row nrow;
-    validateRowWidth(cols, nrow);
-    nrow.at(getColumnIndex("id")) = to_string(nextRowId());
-    for (int i = 0; i < cols.size(); i++) {
-        nrow.at(getColumnIndex(cols[i])) = values[i];
+    for (vector<string> vals : values) {
+        Row nrow;
+        validateRowWidth(cols, nrow);
+        nrow.at(getColumnIndex("id")) = to_string(nextRowId());
+        for (int i = 0; i < cols.size(); i++) {
+            nrow.at(getColumnIndex(cols[i])) = vals[i];
+        }
+        rows.push_back(nrow);
     }
-    rows.push_back(nrow);
+    return values.size();
 }
 
 void Table::printTable() {

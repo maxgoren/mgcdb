@@ -35,18 +35,16 @@ void startTest(vector<string>& queries) {
 
 int main() {
     vector<string> queries = {
-        "insert into boston (name, age, job) values (max, 37, programmer);",
-        "insert into boston (name, age, job) values (platter, 2, developoose);",
-        "insert into boston (name, age, job) values (duckster,11,pilot);",
-        "insert into boston (name, age, job) values (lochnoose,2,octopoose);",
-        "insert into boston (name, age, job) values (coosemac,3,highlander);",
-        "select * from boston;",
-        "select * from boston where age < 36 order by name;",
-        "select * from boston where age < 36 order by age;",
-        "create table shamire (job,stone,last);",
-        "select * from shamire;",
-        "insert into shamire (job,stone,last) values (quetzacotl,quartz,1000);",
-        "select * from shamire;",
+        "create table employees (name, age, job);",
+        "insert into employees (name, age, job) values ('max', 37, 'programmer');",
+        "insert into employees (name, age, job) values ('platter', 22, 'developoose'), ('duckster',29,'pilot'), ('lochnoose',42,'octopoose'), ('coosemac',33,'highlander');",
+        "select * from employees;",
+        "select * from employees where age > 30 order by name;",
+        "select * from employees where age < 30 order by age;",
+        "update employees set job = 'fighter pilot' where name = 'duckster'",
+        "select name, job from employees",
+        "delete from employees where name = 'max';",
+        "select name from employees",
         "quit"
     };
     startTest(queries);

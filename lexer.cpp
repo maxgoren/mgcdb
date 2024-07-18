@@ -83,6 +83,7 @@ Token Lexer::extractWord() {
 
 Token Lexer::extractString() {
     string str;
+    buffer.nextChar();
     while (buffer.getChar() != '\'' && !buffer.done()) {
         str.push_back(buffer.getChar());
         buffer.nextChar();
