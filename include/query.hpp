@@ -2,6 +2,7 @@
 #define query_hpp
 #include <iostream>
 #include <vector>
+#include <map>
 using namespace std;
 
 enum RelationalOperator {
@@ -26,8 +27,9 @@ struct Query {
     string tableName;
     bool order_results;
     string order_on_field;
+    map<string, string> fieldAliases;
     vector<string> fields;
-    vector<vector<string>> value;
+    vector<vector<string>> values;
     vector<WhereClause> where_clause;
 };
 

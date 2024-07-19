@@ -16,9 +16,11 @@ class Table {
         int            row_cnt;
         int            row_id;
         unsigned int   getColumnIndex(string name);
+        bool           hasColumn(string name);
         bool           compareRowsByField(Row& a, Row& b, string field);
         vector<string> orderedHeader();
         void           addNewFields(vector<string>& cols);
+        bool           validateColumnsExist(Query query);
         void           validateRowWidth(vector<string>& cols, vector<string>& nrow);
         bool           hasWhereClause(Query query);
         bool           checkWhereClause(Query query, vector<string>& nrow);

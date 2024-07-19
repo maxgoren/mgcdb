@@ -20,13 +20,4 @@ class StringBuffer {
         bool done();
 };
 
-class FileBuffer {
-    private:
-        vector<string> lines;
-        ifstream infile;
-    public:
-        FileBuffer();
-        vector<string> readFile(string filename);
-};
-
 #endif
