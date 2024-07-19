@@ -13,10 +13,27 @@ int Table::rowCount() {
     return rows.size();
 }
 
+bool Table::hasColumn(string name) {
+    return columnIndexByName.find(name) != columnIndexByName.end();
+}
+
+bool Table::validateColumnsExist(Query query) {
+    for (string column : query.fields) {
+        if (!hasColumn(column)) {
+            cout<<"Error: no such column: "<<column<<endl;
+            return false;
+        }
+    }
+    return true;
+}
+
 Table Table::selectRows(Query query) {
     if (query.fields.size() == 1 && query.fields[0] == "*") {
         query.fields.clear();
         query.fields = orderedHeader();
+    }
+    if (validateColumnsExist(query) == false) {
+        return Table();
     }
     Table result_set;
     for (auto row : rows) {
@@ -32,7 +49,20 @@ Table Table::selectRows(Query query) {
         if (checkWhereClause(query, row)) {
             vector<Row> tmp;
             tmp.push_back(nrow);
-            result_set.addRow(query.fields, tmp);
+            if (!query.fieldAliases.empty()) {
+                vector<string> tableHeader;
+                for (string fa : query.fields) {
+                    if (query.fieldAliases.find(fa) != query.fieldAliases.end()) {
+                        tableHeader.push_back(query.fieldAliases[fa]);
+                    } else {
+                        cout<<"Invalid column name provided: "<<fa<<endl;
+                        return Table();
+                    }
+                }
+                result_set.addRow(tableHeader, tmp);
+            } else {
+                result_set.addRow(query.fields, tmp);
+            }
         }
     }
     if (query.order_results) {
@@ -45,7 +75,7 @@ int Table::updateRows(Query query) {
     int updated = 0;
     for (Row & row : rows) {
         if (checkWhereClause(query, row)) {
-            row.at(getColumnIndex(query.fields[0])) = query.value[0][0];
+            row.at(getColumnIndex(query.fields[0])) = query.values[0][0];
             updated++;
         }
     }
@@ -116,9 +146,15 @@ void Table::printTable() {
 }
 
 void Table::printHeader() {
+    int n = 0;
+    cout<<" ";
     for (string name : orderedHeader()) {
         cout<<name<<", ";
+        n += (name.length() + 2);
     }
+    cout<<endl;
+    for (int i = 0; i < n; i++)
+        cout<<"-";
     cout<<endl;
 }
 

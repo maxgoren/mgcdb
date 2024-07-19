@@ -162,7 +162,7 @@ Query LLParser::parseUpdate() {
         }
         pop();
     }
-    query.value.push_back(values);
+    query.values.push_back(values);
     return query;
 }
 
@@ -179,8 +179,33 @@ Query LLParser::parseSelect() {
                     query.fields.push_back(currentToken.strval);
                     if (peek().token == TK_FROM) {
                         parseStep = LL_SELECT_FROM;
-                    } else {
+                    } else if (peek().token == TK_AS) {
+                        parseStep = LL_SELECT_FIELD_AS;
+                    } else if (peek().token == TK_COMMA) {
                         parseStep = LL_SELECT_COMMA;
+                    } else {
+                        parseStep = LL_PARSE_ERROR;
+                    }
+                } else {
+                    parseStep = LL_PARSE_ERROR;
+                }
+                break;
+            case LL_SELECT_FIELD_AS:
+                if (currentSymbol() == TK_AS) {
+                    parseStep = LL_SELECT_FIELD_AS_ALIAS;
+                } else {
+                    parseStep = LL_PARSE_ERROR;
+                }
+                break;
+            case LL_SELECT_FIELD_AS_ALIAS:
+                if (currentSymbol() == TK_ID) {
+                    query.fieldAliases[query.fields.back()] = currentToken.strval;
+                    if (peek().token == TK_FROM) {
+                        parseStep = LL_SELECT_FROM;
+                    } else if (peek().token == TK_COMMA) {
+                        parseStep = LL_SELECT_COMMA;
+                    } else {
+                        parseStep = LL_PARSE_ERROR;
                     }
                 } else {
                     parseStep = LL_PARSE_ERROR;
@@ -331,7 +356,7 @@ Query LLParser::parseInsert() {
                         parseStep = LL_INSERT_VALUES;
                     }
                 } else if (currentToken.token == TK_RPAREN) {
-                    query.value.push_back(values);
+                    query.values.push_back(values);
                     if (peek().token == TK_COMMA) {
                         parseStep = LL_INSERT_VALUES_COMMA_BEFORE_OPEN_PAREN;
                     } else {

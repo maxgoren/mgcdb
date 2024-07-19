@@ -74,7 +74,7 @@ Token Lexer::extractNumber() {
 
 Token Lexer::extractWord() {
     string word;
-    while (isalpha(buffer.getChar())) {
+    while (isalpha(buffer.getChar()) || buffer.getChar() == '_' || buffer.getChar() == '-') {
         word.push_back(buffer.getChar());
         buffer.nextChar();
     }
@@ -95,20 +95,22 @@ Token Lexer::extractString() {
 }
 
 void Lexer::initReserved() {
-    reservedWord["select"] = Token(TK_SELECT, "select");
+    reservedWord["and"] = Token(TK_AND, "and"); 
+    reservedWord["as"] = Token(TK_AS, "as");
+    reservedWord["by"] = Token(TK_BY, "by");
+    reservedWord["create"] = Token(TK_CREATE, "create");
+    reservedWord["delete"] = Token(TK_DELETE, "delete");
+    reservedWord["false"] = Token(TK_FALSE, "false");
+    reservedWord["from"] = Token(TK_FROM, "from");
     reservedWord["insert"] = Token(TK_INSERT, "insert");
     reservedWord["into"] = Token(TK_INTO, "into");
-    reservedWord["from"] = Token(TK_FROM, "from");
-    reservedWord["true"] = Token(TK_TRUE, "true");
-    reservedWord["false"] = Token(TK_FALSE, "false");
-    reservedWord["create"] = Token(TK_CREATE, "create");
-    reservedWord["and"] = Token(TK_AND, "and"); 
-    reservedWord["set"] = Token(TK_SET, "set");
-    reservedWord["where"] = Token(TK_WHERE, "where");
-    reservedWord["update"] = Token(TK_UPDATE, "update");
-    reservedWord["table"] = Token(TK_TABLE, "table");
-    reservedWord["values"] = Token(TK_VALUES, "values");
+    reservedWord["join"] = Token(TK_JOIN, "join");
     reservedWord["order"] = Token(TK_ORDER, "order");
-    reservedWord["by"] = Token(TK_BY, "by");
-    reservedWord["delete"] = Token(TK_DELETE, "delete");
+    reservedWord["select"] = Token(TK_SELECT, "select");
+    reservedWord["set"] = Token(TK_SET, "set");
+    reservedWord["table"] = Token(TK_TABLE, "table");
+    reservedWord["true"] = Token(TK_TRUE, "true");
+    reservedWord["update"] = Token(TK_UPDATE, "update");
+    reservedWord["values"] = Token(TK_VALUES, "values");
+    reservedWord["where"] = Token(TK_WHERE, "where");
 }

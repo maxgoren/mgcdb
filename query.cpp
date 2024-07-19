@@ -6,7 +6,7 @@ void initQuery(Query* query) {
     query->order_results = false;
     query->order_on_field = "-";
     query->fields.clear();
-    query->value.clear();
+    query->values.clear();
     query->where_clause.clear();
 }
 
@@ -14,19 +14,18 @@ void printQuery(Query query) {
     cout<<"--------------------------"<<endl;
     cout<<"Query Type: "<<qt_as_string[query.type]<<endl;
     cout<<"Table Name: "<<query.tableName<<endl;
-    cout<<"Fields: ";
+    cout<<"Fields: "<<endl;
     for (auto m : query.fields) {
         cout<<m<<", ";
     }
     cout<<endl;
-    cout<<"Values: ";
-    for (auto row : query.value) {
+    cout<<"Values: "<<endl;
+    for (auto row : query.values) {
         for (auto val : row) {
             cout<<val<<", ";
         }
         cout<<endl;
     }
-    cout<<endl;
     for (auto wc : query.where_clause) {
         cout<<"Where Clause: ";
         cout<<wc.fieldname;

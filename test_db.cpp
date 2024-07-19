@@ -15,22 +15,16 @@ void startTest(vector<string>& queries) {
     TableDispatch engine;
     bool running = true;
     string input;
-    Lexer lex;
-    LLParser parser(false);
     int i = 0;
-    while (running) {
+    while (i < queries.size()) {
         input = queries[i++];
-        if (input == "quit" || input == "exit") {
-            cout<<"[Goodbye.]"<<endl;
-            return;
-        }
         cout<<" -> "<<input<<endl;
-        auto tokens = lex.lex(input);
-        //printTokens(tokens);
-        Query query = parser.parse(tokens);
-        printQuery(query);
-        engine.executeQuery(query);
+        engine.runQuery(input);
     }
+    engine.loadFromCSV("address.csv", "address");
+    input = "select * from address;";
+    cout<<" -> "<<input<<endl;
+    engine.runQuery(input);
 }
 
 int main() {
@@ -44,8 +38,7 @@ int main() {
         "update employees set job = 'fighter pilot' where name = 'duckster'",
         "select name, job from employees",
         "delete from employees where name = 'max';",
-        "select name from employees",
-        "quit"
+        "select name from employees"
     };
     startTest(queries);
     return 0;
