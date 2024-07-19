@@ -1,5 +1,5 @@
 # mgcdb
-An embeddable in-memory database
+An embeddable in-memory database with support for loading CSV files as tables to run SQL queries on them.
 
 ## Create a table
 A new table is created using the 'create' keyword, specifying the table name and a comma separated list of column names for the table.
